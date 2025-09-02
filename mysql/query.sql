@@ -1,0 +1,120 @@
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS activity_logs, messages, tasks, projects, users, teams;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- TEAMS
+CREATE TABLE teams (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(120) NOT NULL,
+  description TEXT NULL,
+  admin_id BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_teams_name (name)
+) ENGINE=InnoDB;
+
+-- USERS
+CREATE TABLE users (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  email VARCHAR(255) NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role ENUM('ADMIN','MANAGER','MEMBER') NOT NULL DEFAULT 'MEMBER',
+  team_id BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_users_email (email),
+  KEY idx_users_team (team_id),
+  CONSTRAINT fk_users_team FOREIGN KEY (team_id) REFERENCES teams(id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Now add teams.admin_id referencing users.id (nullable)
+ALTER TABLE teams
+  ADD CONSTRAINT fk_teams_admin FOREIGN KEY (admin_id) REFERENCES users(id)
+  ON UPDATE CASCADE
+  ON DELETE SET NULL;
+
+-- PROJECTS
+CREATE TABLE projects (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  team_id BIGINT UNSIGNED NOT NULL,
+  name VARCHAR(160) NOT NULL,
+  description TEXT NULL,
+  created_by BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_projects_team (team_id),
+  CONSTRAINT fk_projects_team FOREIGN KEY (team_id) REFERENCES teams(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_projects_created_by FOREIGN KEY (created_by) REFERENCES users(id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- TASKS
+CREATE TABLE tasks (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  project_id BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description TEXT NULL,
+  status ENUM('todo','in-progress','done') NOT NULL DEFAULT 'todo',
+  assigned_to BIGINT UNSIGNED NULL,
+  created_by BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_tasks_project (project_id),
+  KEY idx_tasks_assignee (assigned_to),
+  CONSTRAINT fk_tasks_project FOREIGN KEY (project_id) REFERENCES projects(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_tasks_assignee FOREIGN KEY (assigned_to) REFERENCES users(id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL,
+  CONSTRAINT fk_tasks_created_by FOREIGN KEY (created_by) REFERENCES users(id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- MESSAGES (TEAM CHAT)
+CREATE TABLE messages (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  team_id BIGINT UNSIGNED NOT NULL,
+  sender_id BIGINT UNSIGNED NOT NULL,
+  content TEXT NOT NULL,
+  timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_messages_team_time (team_id, timestamp),
+  CONSTRAINT fk_messages_team FOREIGN KEY (team_id) REFERENCES teams(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_messages_sender FOREIGN KEY (sender_id) REFERENCES users(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ACTIVITY LOGS (optional)
+CREATE TABLE activity_logs (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  team_id BIGINT UNSIGNED NOT NULL,
+  user_id BIGINT UNSIGNED NULL,
+  entity ENUM('PROJECT','TASK','MESSAGE','TEAM') NOT NULL,
+  entity_id BIGINT UNSIGNED NULL,
+  action VARCHAR(64) NOT NULL,
+  payload JSON NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_activity_team_time (team_id, created_at),
+  CONSTRAINT fk_activity_team FOREIGN KEY (team_id) REFERENCES teams(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_activity_user FOREIGN KEY (user_id) REFERENCES users(id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
