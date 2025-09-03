@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"amit@example.com\",\n  \"password\": \"password123\",\n  \"role\" : \"ADMIN\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -24,10 +24,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/api/auth/register",
+							"raw": "http://localhost:3000/api/auth/register",
+							"protocol": "http",
 							"host": [
-								"{{host}}"
+								"localhost"
 							],
+							"port": "3000",
 							"path": [
 								"api",
 								"auth",

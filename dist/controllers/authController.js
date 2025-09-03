@@ -25,7 +25,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(409).json({ error: "User with this email already exists." });
         }
         const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
-        const [result] = yield db_1.default.execute('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, "MEMBER")', [name, email, hashedPassword]);
+        const [result] = yield db_1.default.execute('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, hashedPassword]);
         res.status(201).json({ message: "User registered successfully", userId: result.insertId });
     }
     catch (err) {
