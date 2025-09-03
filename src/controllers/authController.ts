@@ -5,7 +5,7 @@ import db from "../config/db";
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, team_id, role } = req.body;
+    const { name, email, password, role } = req.body;
 
     // Check if user already exists
     const [existingUsers]: any = await db.execute("SELECT id FROM users WHERE email = ?", [email]);
@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response) => {
 
     const [result]: any = await db.execute(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword]
+      [name, email, hashedPassword, role]
     );
 
     res.status(201).json({ message: "User registered successfully", userId: result.insertId });

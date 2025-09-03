@@ -18,14 +18,14 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = __importDefault(require("../config/db"));
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, email, password, team_id, role } = req.body;
+        const { name, email, password, role } = req.body;
         // Check if user already exists
         const [existingUsers] = yield db_1.default.execute("SELECT id FROM users WHERE email = ?", [email]);
         if (existingUsers.length > 0) {
             return res.status(409).json({ error: "User with this email already exists." });
         }
         const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
-        const [result] = yield db_1.default.execute('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, hashedPassword]);
+        const [result] = yield db_1.default.execute('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, hashedPassword, role]);
         res.status(201).json({ message: "User registered successfully", userId: result.insertId });
     }
     catch (err) {
