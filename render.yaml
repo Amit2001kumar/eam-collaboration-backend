@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: eam-collaboration-api
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: PORT
+        value: 8080
+      - key: DB_HOST
+        value: containers-us-west-23.railway.app
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: root
+      - key: DB_PASSWORD
+        value: BOkAAnlcySxAodeKLGciQlHlBCcopuHl
+      - key: DB_NAME
+        value: railway
+      - key: JWT_SECRET
+        value: your_secret_key
