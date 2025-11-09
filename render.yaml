@@ -9,15 +9,15 @@ services:
         value: 22
       - key: PORT
         value: 8080
-      - key: DB_HOST
+      - key: MYSQLHOST
         value: containers-us-west-23.railway.app
-      - key: DB_PORT
+      - key: MYSQLPORT
         value: 3306
-      - key: DB_USER
+      - key: MYSQLUSER
         value: root
-      - key: DB_PASSWORD
+      - key: MYSQLPASSWORD
         value: BOkAAnlcySxAodeKLGciQlHlBCcopuHl
-      - key: DB_NAME
+      - key: MYSQLDATABASE
         value: railway
       - key: JWT_SECRET
         value: your_secret_key

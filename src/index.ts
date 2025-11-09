@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import dotenv from "dotenv";
+dotenv.config(); 
 
 import express from 'express';
 import cors from 'cors';
@@ -21,6 +21,13 @@ const io = new SocketIOServer(server, {
     origin: '*',
     methods: ['GET', 'POST'],
   },
+});
+
+console.log("Loaded env vars:", {
+  MYSQLHOST: process.env.MYSQLHOST,
+  MYSQLUSER: process.env.MYSQLUSER,
+  MYSQLPASSWORD: process.env.MYSQLPASSWORD,
+  MYSQLDATABASE: process.env.MYSQLDATABASE,
 });
 
 // Middleware
